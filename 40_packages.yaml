@@ -1,0 +1,9 @@
+---
+- hosts: theone
+  gather_facts: yes
+  tasks:
+    - name: Install some basic packages
+      yum:
+        name: ['telnet', 'perl', 'screen', 'dialog', 'sysstat', 'java-1.8.0-openjdk','java-1.8.0-openjdk-devel', 'chrony']
+        state: present
+      when: ansible_distribution == "CentOS" or ansible_distribution  == "RedHat" or ansible_distribution == "Oracle"

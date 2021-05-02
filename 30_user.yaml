@@ -1,0 +1,37 @@
+---
+- hosts: theone
+  gather_facts: no 
+  vars:
+    domain: globalmaksimum.com
+    default_user_password: superduper
+  tasks:
+    - name: Add group
+      group:
+        name: osuser
+        gid: 1010
+        state: present
+
+    - name: Add many user
+      user:
+        name: "{{ item.username }}"
+        uid: "{{ item.uid }}"
+        force: yes
+        comment: Some os auth allowed users.
+        group: osuser
+        state: present
+        password: "{{ item.password|password_hash('sha512') }}"
+      with_items:
+        - username: jack
+          password: p_jack
+          uid: 1010
+        - username: joe
+          password: p_joe
+          uid: 1020          
+        - username: avarel
+          password: p_avarel
+          uid: 1030          
+        - username: william
+          password: p_william
+          uid: 1040          
+
+      

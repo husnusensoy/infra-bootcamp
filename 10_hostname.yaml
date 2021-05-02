@@ -1,0 +1,9 @@
+---
+- hosts: theone
+  gather_facts: no
+  vars:
+    domain: globalmaksimum.com
+  tasks:
+    - name: Set server hostname
+      hostname:
+        name: "{{ inventory_hostname }}.{{ domain }}"

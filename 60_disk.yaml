@@ -1,0 +1,79 @@
+---
+- hosts: theone
+  gather_facts: no
+  vars:
+    domain: globalmaksimum.com
+  tasks:
+    - name: Grab pvs
+      shell: lsscsi |grep "VMware Virtual"|grep -v "0:0:0"|awk '{print $8}'
+      register: scsi_info
+
+    - name: Cretate a partition to fake it ;)
+      parted:
+        device: "{{ item }}"
+        label: gpt
+        number: 1
+        state: present
+      with_items: "{{scsi_info.stdout_lines}}"
+      register: pvs_info
+
+    - debug: 
+        var: pvs_info
+      when: false
+
+    - name: Create a new  and fancy volume group
+      lvg:
+        vg: vg.monitor
+        pvs: /dev/sdb1,/dev/sdc1,/dev/sdd1
+        state: present
+
+
+    - name: Create lots of logical volumes
+      lvol:
+        vg: vg.monitor
+        lv: " {{ item.name }}"
+        size: "{{ item.size }}" 
+      with_items:
+        - name: prometheus_lv
+          size: 5g
+        - name: grafana_lv
+          size: 5g
+        - name: loki_lv
+          size: 5g
+      when: false
+
+    - name: Create xfs file systems
+      filesystem:
+        fstype: xfs
+        dev: "/dev/mapper/vg.monitor-{{ item }}"
+      with_items:
+        - prometheus_lv
+        - grafana_lv
+        - loki_lv
+
+    - name: Mount file system
+      mount:
+        fstype: xfs
+        path: "/mnt/disks/{{ item.mount_point }}"
+        src: "/dev/mapper/vg.monitor-{{ item.lvol }}"
+        opts: noatime
+        state: mounted
+      with_items:
+        - lvol: prometheus_lv
+          mount_point: prometheus
+        - lvol: grafana_lv
+          mount_point: grafana
+        - lvol: loki_lv
+          mount_point: loki
+
+    - name: Rebooting...
+      reboot:
+
+    - shell: df -kh
+      
+
+
+
+
+
+

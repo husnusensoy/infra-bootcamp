@@ -1,0 +1,22 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+# Public Interfaces of my cluster
+{% for item in groups['worker'] %}
+{{hostvars[item].ansible_host}}   {{item}}-pub.{{domain}}    {{item}}-pub
+{% endfor %}
+
+# Cluster (Private) Interfaces of my cluster
+#   Note: Don't change IP address to ensure cluster still works :)
+{% for item in groups['worker'] %}
+{{hostvars[item].private_ip}}   {{item}}.{{domain}}    {{item}}
+{% endfor %}
+
+# Object storage netwokr 
+{% for item in groups['worker'] %}
+{{hostvars[item].storage_ip}}   {{item}}-s3.{{domain}}    {{item}}-s3
+{% endfor %}
+
+
+
+
