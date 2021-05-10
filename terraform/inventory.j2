@@ -1,0 +1,4 @@
+[vertica]
+%{ for index, dns in vertica-dns ~}
+${dns} ansible_host=${vertica-public[index]}
+%{ endfor ~}

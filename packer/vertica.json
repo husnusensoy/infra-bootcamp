@@ -1,0 +1,85 @@
+{
+    "variables":{
+        "image_name": "Vertica-CentOS-7-x86_64",
+        "vcenter-server": "192.168.88.59",
+        "vcenter-user": "{{env `VCENTER_USER`}}", 
+        "vcenter-password": "{{env `VCENTER_PASSWORD`}}", 
+        "vsphere-dc" : "TcellDudulluDC",        
+        "vsphere-cluster" : "vGlobalCloud",
+        "esx-host": "192.168.88.54",
+        "public-network": "VLAN12-10G",
+        "private-network": "VLAN22-Private",
+        "storage-network": "VLAN32-PureStore",
+        "create_snapshot": "true",
+        "iso_path": "[PureStoreNFS] ISOs/CentOS-7-x86_64-DVD-1908.iso",
+        "datastore": "datastore_L1-L5_R1_800GB_SSD_node54",
+        "name": "vertica"
+    },
+
+    "builders": [
+      {
+        "name": "{{user `name`}}",
+        "CPUs": 2,
+        "RAM": 2048,
+        "create_snapshot": "{{user `create_snapshot`}}",
+        "boot_command": " <esc> <wait> linux inst.text inst.ks=hd:fd0:/ks.cfg <enter> ",
+        "cluster": "{{user `vsphere-cluster`}}",
+        "convert_to_template": true,
+        "datacenter": "{{user `vsphere-dc`}}",
+        "datastore": "{{user `datastore`}}",
+        "disk_controller_type": "pvscsi",
+        "floppy_files": [
+          "{{template_dir}}/ks.cfg"
+        ],
+        "guest_os_type": "centos7_64Guest",
+        "host": "{{user `esx-host`}}",
+        "insecure_connection": "true",
+        "iso_paths": [
+            "{{user `iso_path`}}"
+        ],
+        "network_adapters": [
+          {
+            "network": "{{user `public-network`}}",
+            "network_card": "vmxnet3"
+          },
+          {
+            "network": "{{user `private-network`}}",
+            "network_card": "vmxnet3"
+          },
+          {
+            "network": "{{user `storage-network`}}",
+            "network_card": "vmxnet3"
+          }
+        ],
+        "notes": "Vertica Centos7 Image",
+        "ssh_password": "server",
+        "ssh_username": "root",
+        "storage": [
+          {
+            "disk_size": 72000,
+            "disk_thin_provisioned": true
+          }
+        ],
+        "type": "vsphere-iso",
+        "username": "{{user `vcenter-user`}}",
+        "password": "{{user `vcenter-password`}}",
+        "vcenter_server": "{{user `vcenter-server`}}",
+        "folder": "CirrusTemplate",
+        "vm_name": "{{user `image_name`}}",
+        "vm_version": 18,
+        "ip_wait_timeout": "10m",
+        "ip_wait_address": "172.12.0.0/16"
+      }
+    ],
+    "provisioners": [
+      {
+        "type": "shell",
+        "inline": [
+          "yum -y upgrade",
+          "yum -y install http://172.12.2.1:9000/artifactory/vertica/vertica-10.0.1-4.x86_64.RHEL6.rpm",
+          "reboot -f"
+        ],
+        "expect_disconnect": true
+      }
+    ]
+  }

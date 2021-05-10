@@ -1,0 +1,3 @@
+[vertica]
+bootcamp-vertica-1 ansible_host=172.12.2.40
+bootcamp-vertica-2 ansible_host=172.12.2.42
