@@ -1,0 +1,12 @@
+terraform/.terraform*
+terraform/keys
+terraform/terraform.tfstate*
+terraform/terraform.tfvars
+
+week3-sunday/data
+week3-saturday/.terraform*
+week3-saturday/terraform.tfstate*
+
+# Pycharm IDE
+week3-sunday/.idea
+week3-sunday/__pycache__
